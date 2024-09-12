@@ -183,7 +183,7 @@ jobs:
               mvn -DskipTests=true smart-doc:javadoc-markdown > logs/javadoc-markdown.log 2>&1 || { cat logs/javadoc-markdown.log; exit 1; }
               ;;
             websocket)
-              mvn -DskipTests=true smart-doc:websocket-adocc > logs/websocket-adocc.log 2>&1 || { cat logs/websocket-adocc.log; exit 1; }
+              mvn -DskipTests=true smart-doc:websocket-adoc > logs/websocket-adocc.log 2>&1 || { cat logs/websocket-adocc.log; exit 1; }
               mvn -DskipTests=true smart-doc:websocket-html > logs/websocket-html.log 2>&1 || { cat logs/websocket-html.log; exit 1; }
               mvn -DskipTests=true smart-doc:websocket-markdown > logs/websocket-markdown.log 2>&1 || { cat logs/websocket-markdown.log; exit 1; }
               ;;
@@ -231,7 +231,9 @@ jobs:
           if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
             mkdir -p logs
           elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mkdir logs
+            if [ ! -d "logs" ]; then
+              mkdir logs
+            fi
           fi
         shell: bash
 
