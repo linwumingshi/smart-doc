@@ -227,7 +227,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Create Logs Directory
-        run: mkdir -p logs
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
+            mkdir -p logs
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mkdir logs
+          fi
+        shell: bash
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
