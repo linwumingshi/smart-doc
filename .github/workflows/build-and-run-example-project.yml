@@ -36,7 +36,7 @@ jobs:
       - name: Build and Install Plugin
         run: |
           mvn install > logs/build.log 2>&1
-          if grep -q "Error" logs/build.log; then
+          if grep -E "Exception|Error:|at " logs/build.log; then
             cat logs/build.log
             exit 1
           fi
@@ -100,7 +100,7 @@ jobs:
       - name: Build and Install
         run: |
           mvn -DskipTests=true install > logs/install-plugin.log 2>&1
-          if grep -q "Error" logs/install-plugin.log; then
+          if grep -E "Exception|Error:|at " logs/install-plugin.log; then
             cat logs/install-plugin.log
             exit 1
           fi
@@ -167,7 +167,7 @@ jobs:
       - name: Build and Install Example Project
         run: |
           mvn -DskipTests=true install > logs/build-example-project.log 2>&1
-          if grep -q "Error" logs/build-example-project.log; then
+          if grep -E "Exception|Error:|at " logs/build-example-project.log; then
             cat logs/build-example-project.log
             exit 1
           fi
@@ -177,43 +177,43 @@ jobs:
           case ${{ matrix.doc_type }} in
             rest)
               mvn -DskipTests=true smart-doc:adoc > logs/rest-adoc.log 2>&1
-              if grep -q "Error" logs/rest-adoc.log; then cat logs/rest-adoc.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-adoc.log; then cat logs/rest-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:html > logs/rest-html.log 2>&1
-              if grep -q "Error" logs/rest-html.log; then cat logs/rest-html.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-html.log; then cat logs/rest-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:jmeter > logs/rest-jmeter.log 2>&1
-              if grep -q "Error" logs/rest-jmeter.log; then cat logs/rest-jmeter.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-jmeter.log; then cat logs/rest-jmeter.log; exit 1; fi
               mvn -DskipTests=true smart-doc:markdown > logs/rest-markdown.log 2>&1
-              if grep -q "Error" logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
               mvn -DskipTests=true smart-doc:openapi > logs/rest-openapi.log 2>&1
-              if grep -q "Error" logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
               mvn -DskipTests=true smart-doc:postman > logs/rest-postman.log 2>&1
-              if grep -q "Error" logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi
               mvn -DskipTests=true smart-doc:word > logs/rest-word.log 2>&1
-              if grep -q "Error" logs/rest-word.log; then cat logs/rest-word.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-word.log; then cat logs/rest-word.log; exit 1; fi
               mvn test -Dtest=com.power.doc.torna.TornaApiTest > logs/rest-TornaApiTest.log 2>&1
-              if grep -q "Error" logs/rest-TornaApiTest.log; then cat logs/rest-TornaApiTest.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/rest-TornaApiTest.log; then cat logs/rest-TornaApiTest.log; exit 1; fi
               ;;
             dubbo)
               mvn -DskipTests=true smart-doc:rpc-adoc > logs/dubbo-doc.adoc 2>&1
-              if grep -q "Error" logs/dubbo-doc.adoc; then cat logs/dubbo-doc.adoc; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/dubbo-doc.adoc; then cat logs/dubbo-doc.adoc; exit 1; fi
               mvn -DskipTests=true smart-doc:rpc-html > logs/dubbo-html.log 2>&1
-              if grep -q "Error" logs/dubbo-html.log; then cat logs/dubbo-html.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/dubbo-html.log; then cat logs/dubbo-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:rpc-markdown > logs/dubbo-markdown.log 2>&1
-              if grep -q "Error" logs/dubbo-markdown.log; then cat logs/dubbo-markdown.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/dubbo-markdown.log; then cat logs/dubbo-markdown.log; exit 1; fi
               ;;
             javadoc)
               mvn -DskipTests=true smart-doc:javadoc-adoc > logs/javadoc-adoc.log 2>&1
-              if grep -q "Error" logs/javadoc-adoc.log; then cat logs/javadoc-adoc.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/javadoc-adoc.log; then cat logs/javadoc-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:javadoc-html > logs/javadoc-html.log 2>&1
-              if grep -q "Error" logs/javadoc-html.log; then cat logs/javadoc-html.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/javadoc-html.log; then cat logs/javadoc-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:javadoc-markdown > logs/javadoc-markdown.log 2>&1
-              if grep -q "Error" logs/javadoc-markdown.log; then cat logs/javadoc-markdown.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/javadoc-markdown.log; then cat logs/javadoc-markdown.log; exit 1; fi
               ;;
             websocket)
               mvn -DskipTests=true smart-doc:websocket-adoc > logs/websocket-adoc.log 2>&1
-              if grep -q "Error" logs/websocket-adoc.log; then cat logs/websocket-adoc.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/websocket-adoc.log; then cat logs/websocket-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:websocket-html > logs/websocket-html.log 2>&1
-              if grep -q "Error" logs/websocket-html.log; then cat logs/websocket-html.log; exit 1; fi
+              if grep -E "Exception|Error:|at " logs/websocket-html.log; then cat logs/websocket-html.log; exit 1; fi
               ;;
           esac
 
