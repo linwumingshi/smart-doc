@@ -10,10 +10,10 @@ on:
 
 env:
   smart-doc-version: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
-
+  MAVEN_OPTS: "-Xms512m -Xmx1024m -Xss1024k"
 jobs:
   build:
-    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
+    if: ${{ github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
     runs-on: ubuntu-latest
 
     steps:
