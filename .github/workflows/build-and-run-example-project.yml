@@ -10,7 +10,7 @@ on:
 
 env:
   smart-doc-version: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
-  MAVEN_OPTS: "-Xms512m -Xmx1024m -Xss1024k"
+  MAVEN_OPTS: "-Xms512m -Xmx1024m -Xss2048k"
 
 jobs:
   build:
@@ -304,31 +304,19 @@ jobs:
 
       - name: Generate gRPC AsciiDoc Documentation
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-adoc 2>&1 | tee logs/grpc-adoc.log
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-adoc 2>&1 | Tee-Object logs/grpc-adoc.log
-          fi
+          mvn -DskipTests=true smart-doc:grpc-adoc 2>&1 | tee logs/grpc-adoc.log
           if grep -E "\[ERROR\]" logs/grpc-adoc.log; then cat logs/grpc-adoc.log; exit 1; fi
         shell: bash
 
       - name: Generate gRPC HTML Documentation
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-html 2>&1 | tee logs/grpc-html.log
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-html 2>&1 | Tee-Object logs/grpc-html.log
-          fi
+          mvn -DskipTests=true smart-doc:grpc-html 2>&1 | tee logs/grpc-html.log
           if grep -E "\[ERROR\]" logs/grpc-html.log; then cat logs/grpc-html.log; exit 1; fi
         shell: bash
 
       - name: Generate gRPC Markdown Documentation
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-markdown 2>&1 | tee logs/grpc-markdown.log
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mvn -DskipTests=true smart-doc:grpc-markdown 2>&1 | Tee-Object logs/grpc-markdown.log
-          fi
+          mvn -DskipTests=true smart-doc:grpc-markdown 2>&1 | Tee-Object logs/grpc-markdown.log
           if grep -E "\[ERROR\]" logs/grpc-markdown.log; then cat logs/grpc-markdown.log; exit 1; fi
         shell: bash
 
