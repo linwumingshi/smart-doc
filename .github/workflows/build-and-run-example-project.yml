@@ -36,7 +36,7 @@ jobs:
       - name: Build and Install Plugin
         run: |
           mvn install > logs/build.log 2>&1
-          if grep -E "Exception|Error:|at " logs/build.log; then
+          if grep -E "\[ERROR\]" logs/build.log; then
             cat logs/build.log
             exit 1
           fi
@@ -100,7 +100,7 @@ jobs:
       - name: Build and Install
         run: |
           mvn -DskipTests=true install > logs/install-plugin.log 2>&1
-          if grep -E "Exception|Error:|at " logs/install-plugin.log; then
+          if grep -E "\[ERROR\]" logs/install-plugin.log; then
             cat logs/install-plugin.log
             exit 1
           fi
@@ -167,7 +167,7 @@ jobs:
       - name: Build and Install Example Project
         run: |
           mvn -DskipTests=true install > logs/build-example-project.log 2>&1
-          if grep -E "Exception|Error:|at " logs/build-example-project.log; then
+          if grep -E "\[ERROR\]" logs/build-example-project.log; then
             cat logs/build-example-project.log
             exit 1
           fi
@@ -177,48 +177,134 @@ jobs:
           case ${{ matrix.doc_type }} in
             rest)
               mvn -DskipTests=true smart-doc:adoc > logs/rest-adoc.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-adoc.log; then cat logs/rest-adoc.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-adoc.log; then cat logs/rest-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:html > logs/rest-html.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-html.log; then cat logs/rest-html.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-html.log; then cat logs/rest-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:jmeter > logs/rest-jmeter.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-jmeter.log; then cat logs/rest-jmeter.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-jmeter.log; then cat logs/rest-jmeter.log; exit 1; fi
               mvn -DskipTests=true smart-doc:markdown > logs/rest-markdown.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
               mvn -DskipTests=true smart-doc:openapi > logs/rest-openapi.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
               mvn -DskipTests=true smart-doc:postman > logs/rest-postman.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi
               mvn -DskipTests=true smart-doc:word > logs/rest-word.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-word.log; then cat logs/rest-word.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-word.log; then cat logs/rest-word.log; exit 1; fi
               mvn test -Dtest=com.power.doc.torna.TornaApiTest > logs/rest-TornaApiTest.log 2>&1
-              if grep -E "Exception|Error:|at " logs/rest-TornaApiTest.log; then cat logs/rest-TornaApiTest.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/rest-TornaApiTest.log; then cat logs/rest-TornaApiTest.log; exit 1; fi
               ;;
             dubbo)
               mvn -DskipTests=true smart-doc:rpc-adoc > logs/dubbo-doc.adoc 2>&1
-              if grep -E "Exception|Error:|at " logs/dubbo-doc.adoc; then cat logs/dubbo-doc.adoc; exit 1; fi
+              if grep -E "\[ERROR\]" logs/dubbo-doc.adoc; then cat logs/dubbo-doc.adoc; exit 1; fi
               mvn -DskipTests=true smart-doc:rpc-html > logs/dubbo-html.log 2>&1
-              if grep -E "Exception|Error:|at " logs/dubbo-html.log; then cat logs/dubbo-html.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/dubbo-html.log; then cat logs/dubbo-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:rpc-markdown > logs/dubbo-markdown.log 2>&1
-              if grep -E "Exception|Error:|at " logs/dubbo-markdown.log; then cat logs/dubbo-markdown.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/dubbo-markdown.log; then cat logs/dubbo-markdown.log; exit 1; fi
               ;;
             javadoc)
               mvn -DskipTests=true smart-doc:javadoc-adoc > logs/javadoc-adoc.log 2>&1
-              if grep -E "Exception|Error:|at " logs/javadoc-adoc.log; then cat logs/javadoc-adoc.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/javadoc-adoc.log; then cat logs/javadoc-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:javadoc-html > logs/javadoc-html.log 2>&1
-              if grep -E "Exception|Error:|at " logs/javadoc-html.log; then cat logs/javadoc-html.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/javadoc-html.log; then cat logs/javadoc-html.log; exit 1; fi
               mvn -DskipTests=true smart-doc:javadoc-markdown > logs/javadoc-markdown.log 2>&1
-              if grep -E "Exception|Error:|at " logs/javadoc-markdown.log; then cat logs/javadoc-markdown.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/javadoc-markdown.log; then cat logs/javadoc-markdown.log; exit 1; fi
               ;;
             websocket)
               mvn -DskipTests=true smart-doc:websocket-adoc > logs/websocket-adoc.log 2>&1
-              if grep -E "Exception|Error:|at " logs/websocket-adoc.log; then cat logs/websocket-adoc.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/websocket-adoc.log; then cat logs/websocket-adoc.log; exit 1; fi
               mvn -DskipTests=true smart-doc:websocket-html > logs/websocket-html.log 2>&1
-              if grep -E "Exception|Error:|at " logs/websocket-html.log; then cat logs/websocket-html.log; exit 1; fi
+              if grep -E "\[ERROR\]" logs/websocket-html.log; then cat logs/websocket-html.log; exit 1; fi
               ;;
           esac
 
-      - name: Upload API Documentation Logs
+      - name: Upload ${{ matrix.doc_type }} API Documentation Logs
         uses: actions/upload-artifact@v4
         with:
-          name: api-docs-logs
+          name: ${{ matrix.doc_type }}-api-docs-logs
+          path: logs
+
+  generate-grpc-api-doc:
+    needs: maven-plugin-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    concurrency:
+      group: generate-grpc-api-doc-${{ matrix.os }}-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout Example Project
+        uses: actions/checkout@v4
+        with:
+          repository: smart-doc-group/smart-doc-example-cn
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Create Logs Directory
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
+            mkdir -p logs
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            if [ ! -d "logs" ]; then
+              mkdir logs
+            fi
+          fi
+        shell: bash
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: smart-doc-maven-plugin-jar
+          path: ./artifacts
+
+      - name: Move Files to Local Maven Repository
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
+            TARGET_DIR=~/.m2/repository/com/ly/smart-doc/
+            mkdir -p "$TARGET_DIR" || echo "Directory already exists"
+            rsync -av --delete ./artifacts/ "$TARGET_DIR"
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            TARGET_DIR="$USERPROFILE\\.m2\\repository\\com\\ly\\smart-doc\\"
+            mkdir -p "$TARGET_DIR" || echo "Directory already exists"
+            cp -r ./artifacts/* "$TARGET_DIR"
+          fi
+        shell: bash
+
+
+      - name: Update Smart-Doc Version in pom.xml
+        run: |
+          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+
+      - name: Build and Install Example Project
+        run: |
+          mvn -DskipTests=true install > build.log 2>&1 || { cat build.log; exit 1; }
+
+      - name: Generate gRPC AsciiDoc Documentation
+        run: |
+          mvn -DskipTests=true smart-doc:grpc-adoc > logs/grpc-adoc.log 2>&1 || { cat logs/grpc-adoc.log; exit 1; }
+
+      - name: Generate gRPC HTML Documentation
+        run: mvn -DskipTests=true smart-doc:grpc-html > logs/grpc-html.log 2>&1 || { cat logs/grpc-html.log; exit 1; }
+
+      - name: Generate gRPC Markdown Documentation
+        run: mvn -DskipTests=true smart-doc:grpc-markdown > logs/grpc-markdown.log 2>&1 || { cat logs/grpc-markdown.log; exit 1; }
+
+      - name: Upload gRPC API Documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: gRPC-api-doc-${{ runner.os }}
+          path: ${{ github.workspace }}/target/doc/
+          if-no-files-found: error
+
+      - name: Upload ${{ runner.os }} gRPC API Documentation Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}-grpc-api-doc-log
           path: logs
