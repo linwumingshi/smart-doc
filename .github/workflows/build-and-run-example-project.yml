@@ -188,7 +188,7 @@ jobs:
               mvn -DskipTests=true smart-doc:markdown 2>&1 | tee logs/rest-markdown.log
               if grep -E "\[ERROR\]" logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
           
-              mvn ${{ env.MAVEN_OPTS }}  -DskipTests=true smart-doc:openapi 2>&1 | tee logs/rest-openapi.log
+              mvn -DskipTests=true smart-doc:openapi 2>&1 | tee logs/rest-openapi.log
               if grep -E "\[ERROR\]" logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
           
               mvn -DskipTests=true smart-doc:postman 2>&1 | tee logs/rest-postman.log
@@ -235,6 +235,8 @@ jobs:
               ;;
           esac
 
+        env:
+          MAVEN_OPTS: "-Xms512m -Xmx1024m -Xss2048k"
       - name: Upload ${{ matrix.doc_type }} API Documentation Logs
         if: failure()
         uses: actions/upload-artifact@v4
