@@ -53,7 +53,7 @@ jobs:
         if: failure()  # Only run if previous steps fail
         uses: actions/upload-artifact@v4
         with:
-          name: smart-doc-build-log
+          name: error-log-smart-doc-build
           path: logs/build.log
 
   maven-plugin-build:
@@ -117,7 +117,7 @@ jobs:
         if: failure() # Only run if previous steps fail
         uses: actions/upload-artifact@v4
         with:
-          name: maven-plugin-build-logs
+          name: error-log-maven-plugin-build
           path: logs/install-plugin.log
 
   generate-api-docs:
@@ -194,7 +194,6 @@ jobs:
               mvn -DskipTests=true smart-doc:postman 2>&1 | tee logs/rest-postman.log
               if grep -E "\[ERROR\]" logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi 
           
-          
               mvn -DskipTests=true smart-doc:swagger 2>&1 | teelogs/rest-swagger.log
               if grep -E "\[ERROR\]" logs/rest-swagger.log; then cat logs/rest-swagger.log; exit 1; fi   
           
@@ -240,7 +239,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.doc_type }}-api-docs-logs
+          name: error-log-${{ matrix.doc_type }}-api-docs
           path: logs
 
   generate-grpc-api-doc:
@@ -296,11 +295,7 @@ jobs:
 
       - name: Build and Install Example Project
         run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mvn -DskipTests=true install 2>&1 | tee logs/build-example-project.log
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mvn -DskipTests=true install 2>&1 | Tee-Object logs/build-example-project.log
-          fi
+          mvn -DskipTests=true install 2>&1 | tee logs/build-example-project.log
           if grep -E "\[ERROR\]" logs/build-example-project.log; then
             cat logs/build-example-project.log
             exit 1
@@ -348,5 +343,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }}-grpc-api-doc-log
+          name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
