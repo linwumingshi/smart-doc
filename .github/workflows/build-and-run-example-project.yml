@@ -234,9 +234,6 @@ jobs:
               if grep -E "\[ERROR\]" logs/websocket-markdown.log; then cat logs/websocket-markdown.log; exit 1; fi
               ;;
           esac
-
-        env:
-          MAVEN_OPTS: "-Xms512m -Xmx1024m -Xss2048k"
       - name: Upload ${{ matrix.doc_type }} API Documentation Logs
         if: failure()
         uses: actions/upload-artifact@v4
