@@ -188,7 +188,7 @@ jobs:
               mvn -DskipTests=true smart-doc:markdown 2>&1 | tee logs/rest-markdown.log
               if grep -E "\[ERROR\]" logs/rest-markdown.log; then cat logs/rest-markdown.log; exit 1; fi
           
-              mvn -DskipTests=true smart-doc:openapi 2>&1 | tee logs/rest-openapi.log
+              mvn ${{ env.MAVEN_OPTS }}  -DskipTests=true smart-doc:openapi 2>&1 | tee logs/rest-openapi.log
               if grep -E "\[ERROR\]" logs/rest-openapi.log; then cat logs/rest-openapi.log; exit 1; fi
           
               mvn -DskipTests=true smart-doc:postman 2>&1 | tee logs/rest-postman.log
@@ -316,7 +316,7 @@ jobs:
 
       - name: Generate gRPC Markdown Documentation
         run: |
-          mvn -DskipTests=true smart-doc:grpc-markdown 2>&1 | Tee-Object logs/grpc-markdown.log
+          mvn -DskipTests=true smart-doc:grpc-markdown 2>&1 | tee logs/grpc-markdown.log
           if grep -E "\[ERROR\]" logs/grpc-markdown.log; then cat logs/grpc-markdown.log; exit 1; fi
         shell: bash
 
