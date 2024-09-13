@@ -144,13 +144,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Create Logs Directory
-        run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mkdir -p logs
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            if (-Not (Test-Path -Path "logs")) { New-Item -Path "logs" -ItemType Directory }
-          fi
-        shell: bash
+        run: mkdir -p logs
 
       - name: Download Artifact
         uses: actions/download-artifact@v4
@@ -273,14 +267,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Create Logs Directory
-        run: |
-          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
-            mkdir -p logs
-          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            if [ ! -d "logs" ]; then
-              mkdir logs
-            fi
-          fi
+        run: mkdir -p logs
         shell: bash
 
       - name: Download Artifact
