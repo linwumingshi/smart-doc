@@ -193,13 +193,13 @@ jobs:
               mvn -DskipTests=true smart-doc:postman 2>&1 | tee logs/rest-postman.log
               if grep -E "\[ERROR\]" logs/rest-postman.log; then cat logs/rest-postman.log; exit 1; fi 
           
-              mvn -DskipTests=true smart-doc:swagger 2>&1 | teelogs/rest-swagger.log
+              mvn -DskipTests=true smart-doc:swagger 2>&1 | tee logs/rest-swagger.log
               if grep -E "\[ERROR\]" logs/rest-swagger.log; then cat logs/rest-swagger.log; exit 1; fi   
           
-              mvn -DskipTests=true smart-doc:word 2>&1 | teelogs/rest-word.log
+              mvn -DskipTests=true smart-doc:word 2>&1 | tee logs/rest-word.log
               if grep -E "\[ERROR\]" logs/rest-word.log; then cat logs/rest-word.log; exit 1; fi   
           
-              mvn test -Dtest=com.power.doc.torna.TornaApiTest 2>&1 | teelogs/rest-TornaApiTest.log
+              mvn test -Dtest=com.power.doc.torna.TornaApiTest 2>&1 | tee logs/rest-TornaApiTest.log
               if grep -E "\[ERROR\]" logs/rest-TornaApiTest.log; then cat logs/rest-TornaApiTest.log; exit 1; fi
               ;;
             dubbo)
