@@ -58,6 +58,10 @@ public class ApiDoc implements IDoc, Comparable<ApiDoc> {
 	 */
 	private String[] tags;
 
+	/**
+	 * tag refs
+	 *
+	 */
 	private final Set<TagDoc> tagRefs = Collections.synchronizedSet(new LinkedHashSet<>());
 
 	/**
@@ -241,14 +245,35 @@ public class ApiDoc implements IDoc, Comparable<ApiDoc> {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{");
-		sb.append("\"order\":").append(order);
-		sb.append(",\"name\":\"").append(name).append('\"');
-		sb.append(",\"alias\":\"").append(alias).append('\"');
-		sb.append(",\"list\":").append(list);
-		sb.append(",\"desc\":\"").append(desc).append('\"');
-		sb.append('}');
-		return sb.toString();
+		return "ApiDoc{" + "order=" + order + ", name='" + name + '\'' + ", alias='" + alias + '\'' + ", tags="
+				+ Arrays.toString(tags) + ", group='" + group + '\'' + ", packageName='" + packageName + '\''
+				+ ", list=" + list + ", desc='" + desc + '\'' + ", link='" + link + '\'' + ", author='" + author + '\''
+				+ ", isFolder=" + isFolder + ", childrenApiDocs=" + childrenApiDocs + ", tagRefs=" + tagRefs + '}';
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ApiDoc apiDoc = (ApiDoc) o;
+		return isFolder == apiDoc.isFolder && Objects.equals(order, apiDoc.order) && Objects.equals(name, apiDoc.name)
+				&& Objects.equals(alias, apiDoc.alias) && Arrays.equals(tags, apiDoc.tags)
+				&& Objects.equals(group, apiDoc.group) && Objects.equals(packageName, apiDoc.packageName)
+				&& Objects.equals(list, apiDoc.list) && Objects.equals(desc, apiDoc.desc)
+				&& Objects.equals(link, apiDoc.link) && Objects.equals(author, apiDoc.author)
+				&& Objects.equals(childrenApiDocs, apiDoc.childrenApiDocs);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(order, name, alias, group, packageName, list, desc, link, author, isFolder,
+				childrenApiDocs);
+		result = 31 * result + Arrays.hashCode(tags);
+		return result;
 	}
 
 	@Override

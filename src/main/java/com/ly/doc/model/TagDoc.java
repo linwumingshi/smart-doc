@@ -22,6 +22,7 @@ package com.ly.doc.model;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -31,10 +32,19 @@ import java.util.Set;
  */
 public class TagDoc {
 
+	/**
+	 * tag name
+	 */
 	private String tag;
 
+	/**
+	 * api docs
+	 */
 	private final Set<ApiDoc> clazzDocs = Collections.synchronizedSet(new LinkedHashSet<>());
 
+	/**
+	 * api methods
+	 */
 	private final Set<ApiMethodDoc> methodDocs = Collections.synchronizedSet(new LinkedHashSet<>(64));
 
 	private TagDoc() {
@@ -59,6 +69,24 @@ public class TagDoc {
 
 	public Set<ApiMethodDoc> getMethodDocs() {
 		return methodDocs;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		TagDoc tagDoc = (TagDoc) o;
+		return Objects.equals(tag, tagDoc.tag) && Objects.equals(clazzDocs, tagDoc.clazzDocs)
+				&& Objects.equals(methodDocs, tagDoc.methodDocs);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(tag, clazzDocs, methodDocs);
 	}
 
 }

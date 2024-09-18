@@ -36,8 +36,14 @@ import java.util.*;
  */
 public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 
+	/**
+	 * serialVersionUID
+	 */
 	private static final long serialVersionUID = 7211922919532562867L;
 
+	/**
+	 * api class doc
+	 */
 	private ApiDoc clazzDoc;
 
 	/**
@@ -225,6 +231,9 @@ public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 		return this;
 	}
 
+	/**
+	 * tag reference
+	 */
 	private final Set<TagDoc> tagRefs = Collections.synchronizedSet(new LinkedHashSet<>());
 
 	public Integer getIsRequestArray() {
@@ -512,31 +521,15 @@ public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("{");
-		sb.append("\"methodId\":\"").append(methodId).append('\"');
-		sb.append(",\"name\":\"").append(name).append('\"');
-		sb.append(",\"order\":").append(order);
-		sb.append(",\"desc\":\"").append(desc).append('\"');
-		sb.append(",\"detail\":\"").append(detail).append('\"');
-		sb.append(",\"serverUrl\":\"").append(serverUrl).append('\"');
-		sb.append(",\"url\":\"").append(url).append('\"');
-		sb.append(",\"path\":\"").append(path).append('\"');
-		sb.append(",\"type\":\"").append(type).append('\"');
-		sb.append(",\"author\":\"").append(author).append('\"');
-		sb.append(",\"headers\":\"").append(headers).append('\"');
-		sb.append(",\"contentType\":\"").append(contentType).append('\"');
-		sb.append(",\"requestHeaders\":").append(requestHeaders);
-		sb.append(",\"pathParams\":").append(pathParams);
-		sb.append(",\"queryParams\":").append(queryParams);
-		sb.append(",\"requestParams\":").append(requestParams);
-		sb.append(",\"requestUsage\":\"").append(requestUsage).append('\"');
-		sb.append(",\"requestExample\":").append(requestExample);
-		sb.append(",\"responseUsage\":\"").append(responseUsage).append('\"');
-		sb.append(",\"responseParams\":").append(responseParams);
-		sb.append(",\"deprecated\":").append(deprecated);
-		sb.append(",\"extensions\":").append(extensions);
-		sb.append('}');
-		return sb.toString();
+		return "{" + "\"methodId\":\"" + methodId + '\"' + ",\"name\":\"" + name + '\"' + ",\"order\":" + order
+				+ ",\"desc\":\"" + desc + '\"' + ",\"detail\":\"" + detail + '\"' + ",\"serverUrl\":\"" + serverUrl
+				+ '\"' + ",\"url\":\"" + url + '\"' + ",\"path\":\"" + path + '\"' + ",\"type\":\"" + type + '\"'
+				+ ",\"author\":\"" + author + '\"' + ",\"headers\":\"" + headers + '\"' + ",\"contentType\":\""
+				+ contentType + '\"' + ",\"requestHeaders\":" + requestHeaders + ",\"pathParams\":" + pathParams
+				+ ",\"queryParams\":" + queryParams + ",\"requestParams\":" + requestParams + ",\"requestUsage\":\""
+				+ requestUsage + '\"' + ",\"requestExample\":" + requestExample + ",\"responseUsage\":\""
+				+ responseUsage + '\"' + ",\"responseParams\":" + responseParams + ",\"deprecated\":" + deprecated
+				+ ",\"extensions\":" + extensions + '}';
 	}
 
 	@Override
@@ -570,6 +563,46 @@ public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 	@Override
 	public List<String> getReturnClasses() {
 		return ParamUtil.extractQualifiedName(this.responseParams);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ApiMethodDoc that = (ApiMethodDoc) o;
+		return order == that.order && deprecated == that.deprecated && download == that.download
+				&& Objects.equals(methodId, that.methodId) && Objects.equals(name, that.name)
+				&& Objects.equals(desc, that.desc) && Objects.equals(detail, that.detail)
+				&& Objects.equals(serverUrl, that.serverUrl) && Objects.equals(url, that.url)
+				&& Objects.equals(path, that.path) && Objects.equals(type, that.type)
+				&& Objects.equals(author, that.author) && Objects.equals(headers, that.headers)
+				&& Objects.equals(contentType, that.contentType) && Objects.equals(requestHeaders, that.requestHeaders)
+				&& Objects.equals(pathParams, that.pathParams) && Objects.equals(queryParams, that.queryParams)
+				&& Objects.equals(requestParams, that.requestParams) && Objects.equals(requestUsage, that.requestUsage)
+				&& Objects.equals(requestExample, that.requestExample)
+				&& Objects.equals(responseUsage, that.responseUsage)
+				&& Objects.equals(responseParams, that.responseParams)
+				&& Objects.equals(returnSchema, that.returnSchema) && Objects.equals(requestSchema, that.requestSchema)
+				&& Objects.equals(group, that.group) && Objects.equals(link, that.link)
+				&& Objects.equals(page, that.page) && Objects.equals(isRequestArray, that.isRequestArray)
+				&& Objects.equals(requestArrayType, that.requestArrayType)
+				&& Objects.equals(isResponseArray, that.isResponseArray)
+				&& Objects.equals(responseArrayType, that.responseArrayType) && Arrays.equals(tags, that.tags)
+				&& Objects.equals(version, that.version) && Objects.equals(extensions, that.extensions);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = Objects.hash(methodId, name, order, desc, detail, serverUrl, url, path, type, author, headers,
+				contentType, requestHeaders, pathParams, queryParams, requestParams, requestUsage, requestExample,
+				responseUsage, responseParams, deprecated, returnSchema, requestSchema, group, download, link, page,
+				isRequestArray, requestArrayType, isResponseArray, responseArrayType, version, extensions);
+		result = 31 * result + Arrays.hashCode(tags);
+		return result;
 	}
 
 }
