@@ -793,6 +793,7 @@ public interface IRestDocTemplate extends IBaseDocBuildTemplate {
 			apiMethodDoc.setPathParams(apiMethodReqParam.getPathParams());
 			apiMethodDoc.setQueryParams(apiMethodReqParam.getQueryParams());
 			apiMethodDoc.setRequestParams(apiMethodReqParam.getRequestParams());
+			apiMethodDoc.setOneOfParams(apiMethodReqParam.getOneOfParams());
 
 			if (paramsDataToTree) {
 				// convert to tree

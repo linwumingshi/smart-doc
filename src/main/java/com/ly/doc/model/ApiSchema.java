@@ -33,8 +33,14 @@ import java.util.List;
  */
 public class ApiSchema<T extends IDoc> implements Serializable {
 
+	/**
+	 * serialVersionUID
+	 */
 	private static final long serialVersionUID = -8712793142951321786L;
 
+	/**
+	 * api data
+	 */
 	List<T> apiDatas;
 
 	/**

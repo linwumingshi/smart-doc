@@ -133,6 +133,11 @@ public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 	private List<ApiParam> requestParams;
 
 	/**
+	 * oneOf params
+	 */
+	private Map<String, List<ApiParam>> oneOfParams;
+
+	/**
 	 * http request-example usage(requestUrlParam + requestBody)
 	 */
 	private String requestUsage;
@@ -517,6 +522,15 @@ public class ApiMethodDoc implements IMethod, Serializable, Cloneable {
 
 	public void setExtensions(Map<String, Object> extensions) {
 		this.extensions = extensions;
+	}
+
+	public Map<String, List<ApiParam>> getOneOfParams() {
+		return oneOfParams;
+	}
+
+	public ApiMethodDoc setOneOfParams(Map<String, List<ApiParam>> oneOfParams) {
+		this.oneOfParams = oneOfParams;
+		return this;
 	}
 
 	@Override

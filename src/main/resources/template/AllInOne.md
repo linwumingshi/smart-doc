@@ -89,6 +89,26 @@ for(param in doc.requestParams){
 <%}%>
 <%}%>
 
+<%if(isNotEmpty(doc.oneOfParams)){%>
+**OneOf-parameters**
+<%
+for(entry in doc.oneOfParams){
+var className = entry.key;
+var oneOfParamList = entry.value;
+%>
+#### ${className} <a id="${className}"></a>
+
+| Parameter | Type | Required | Description | Since |
+|-----------|------|----------|-------------|-------|
+<%
+for(param in oneOfParamList){
+%>
+|${param.field}|${param.type}|${param.required}|${lineBreaksToBr(param.desc)}|${param.version}|
+<%}%>
+
+<%}%>
+<%}%>
+
 <%if(isNotEmpty(doc.requestUsage)&&isRequestExample){%>
 **Request-example:**
 ```bash

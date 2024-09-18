@@ -210,4 +210,21 @@ public interface DocAnnotationConstants {
 	 */
 	String PATH_PARAM = "PathParam";
 
+	/**
+	 * `@com.fasterxml.jackson.annotation.JsonTypeInfo`
+	 * {@code com.fasterxml.jackson.annotation.JsonTypeInfo}
+	 */
+	String JSON_TYPE_INFO = "JsonTypeInfo";
+
+	/**
+	 * `@com.fasterxml.jackson.annotation.JsonSubTypes`
+	 * {@code com.fasterxml.jackson.annotation.JsonSubTypes}
+	 */
+	String JSON_SUB_TYPES = "JsonSubTypes";
+
+	/**
+	 * property
+	 */
+	String PROPERTY = "property";
+
 }

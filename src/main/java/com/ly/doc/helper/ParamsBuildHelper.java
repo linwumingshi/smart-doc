@@ -34,7 +34,11 @@ import com.power.common.util.StringUtil;
 import com.thoughtworks.qdox.model.JavaAnnotation;
 import com.thoughtworks.qdox.model.JavaClass;
 import com.thoughtworks.qdox.model.JavaField;
+import com.thoughtworks.qdox.model.JavaType;
 import com.thoughtworks.qdox.model.expression.AnnotationValue;
+import com.thoughtworks.qdox.model.expression.AnnotationValueList;
+import com.thoughtworks.qdox.model.expression.TypeRef;
+import com.thoughtworks.qdox.model.impl.DefaultJavaAnnotation;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -108,13 +112,25 @@ public class ParamsBuildHelper extends BaseHelper {
 				globGicName = DocClassUtil.getSimpleGicName(superJavaClass.getGenericFullyQualifiedName());
 			}
 		}
-		PropertyNamingStrategies.NamingBase fieldNameConvert = null;
-		// ignore
-		if (Objects.nonNull(cls)) {
-			List<JavaAnnotation> clsAnnotation = cls.getAnnotations();
-			fieldNameConvert = PropertyNameHelper.translate(clsAnnotation);
+
+		if (Objects.isNull(cls)) {
+			return paramList;
 		}
+		// class annotation
+		List<JavaAnnotation> clsAnnotation = cls.getAnnotations();
+		// ignore
+		PropertyNamingStrategies.NamingBase fieldNameConvert = PropertyNameHelper.translate(clsAnnotation);
 		JavaClassUtil.genericParamMap(genericMap, cls, globGicName);
+
+		// class annotation Map
+		Map<String, JavaAnnotation> annotationMap = clsAnnotation.stream()
+			.collect(Collectors.toMap(annotation -> annotation.getType().getValue(), annotation -> annotation,
+					(existing, replacement) -> existing));
+		Optional<JavaAnnotation> jsonTypeInfo = Optional
+			.ofNullable(annotationMap.get(DocAnnotationConstants.JSON_TYPE_INFO));
+
+		Optional<JavaAnnotation> jsonSubTypes = Optional
+			.ofNullable(annotationMap.get(DocAnnotationConstants.JSON_SUB_TYPES));
 
 		if (JavaClassValidateUtil.isPrimitive(simpleName)) {
 			String processedType = processFieldTypeName(isShowJavaType, simpleName);
@@ -172,6 +188,82 @@ public class ParamsBuildHelper extends BaseHelper {
 		else {
 			Map<String, String> ignoreFields = JavaClassUtil.getClassJsonIgnoreFields(cls);
 			List<DocJavaField> fields = JavaClassUtil.getFields(cls, 0, new LinkedHashMap<>(), classLoader);
+
+			// if jsonTypeInfo and jsonSubTypes exist, then it is a polymorphic type
+			if (jsonTypeInfo.isPresent() && jsonSubTypes.isPresent()) {
+				JavaAnnotation jsonTypeInfoAnnotation = jsonTypeInfo.get();
+				JavaAnnotation jsonSubTypeAnnotation = jsonSubTypes.get();
+				List<List<ApiParam>> oneOnf = new ArrayList<>();
+				// @JsonTypeInfo(
+				// use = JsonTypeInfo.Id.NAME,
+				// include = JsonTypeInfo.As.PROPERTY,
+				// property = "type"
+				// )
+				AnnotationValue property = jsonTypeInfoAnnotation.getProperty(DocAnnotationConstants.PROPERTY);
+				if (Objects.nonNull(property)) {
+					// property value
+					String propertyValue = StringUtil.removeDoubleQuotes(property.getParameterValue().toString());
+					if (StringUtil.isNotEmpty(propertyValue)) {
+						ApiParam apiParam = ApiParam.of()
+							.setId(atomicOrDefault(atomicInteger, paramList.size() + pid + 1))
+							.setClassName(className)
+							.setField(pre + propertyValue)
+							.setPid(pid)
+							.setType("string")
+							.setRequired(true)
+							.setFullyTypeName(JavaTypeConstants.JAVA_STRING_FULLY);
+
+						// Json SubTypes
+						AnnotationValue value = jsonSubTypeAnnotation.getProperty(DocAnnotationConstants.VALUE_PROP);
+
+						if (Objects.nonNull(value)) {
+							StringBuilder nameBuilder = new StringBuilder("One of (");
+							if (value instanceof AnnotationValueList) {
+								List<AnnotationValue> valueList = ((AnnotationValueList) value).getValueList();
+
+								for (AnnotationValue item : valueList) {
+									DefaultJavaAnnotation javaAnnotation = (DefaultJavaAnnotation) item;
+
+									// @JsonSubTypes.Type get value
+									JavaType type = ((TypeRef) javaAnnotation
+										.getProperty(DocAnnotationConstants.VALUE_PROP)).getType();
+									String fullyQualifiedName = type.getFullyQualifiedName();
+									// get name
+									String name = StringUtil
+										.removeDoubleQuotes(javaAnnotation.getProperty(DocAnnotationConstants.NAME_PROP)
+											.getParameterValue()
+											.toString());
+									if (StringUtil.isEmpty(apiParam.getValue())) {
+										apiParam.setValue(name);
+									}
+									nameBuilder.append("[")
+										.append(type.getGenericValue())
+										.append("](#")
+										.append(fullyQualifiedName)
+										.append("),");
+									oneOnf.add(buildParams(fullyQualifiedName, pre, nextLevel, isRequired, isResp,
+											registryClasses, projectBuilder, groupClasses, methodJsonViewClasses, pid,
+											jsonRequest, atomicInteger));
+								}
+								if (nameBuilder.length() > 0) {
+									nameBuilder.setCharAt(nameBuilder.length() - 1, ')');
+								}
+								else {
+									nameBuilder.append(')');
+								}
+								apiParam.setDesc(nameBuilder.toString()).setOneOfs(oneOnf);
+							}
+							// TODO
+							else {
+								String itemClass = value.getParameterValue().toString();
+							}
+						}
+						paramList.add(apiParam);
+					}
+				}
+
+			}
+
 			out: for (DocJavaField docField : fields) {
 				JavaField field = docField.getJavaField();
 				String maxLength = JavaFieldUtil.getParamMaxLength(field.getAnnotations());

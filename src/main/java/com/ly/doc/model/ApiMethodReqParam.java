@@ -21,6 +21,7 @@
 package com.ly.doc.model;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author yu 2020/11/26.
@@ -41,6 +42,11 @@ public class ApiMethodReqParam {
 	 * http request params
 	 */
 	private List<ApiParam> requestParams;
+
+	/**
+	 * oneOf params
+	 */
+	private Map<String, List<ApiParam>> oneOfParams;
 
 	public static ApiMethodReqParam builder() {
 		return new ApiMethodReqParam();
@@ -70,6 +76,15 @@ public class ApiMethodReqParam {
 
 	public ApiMethodReqParam setRequestParams(List<ApiParam> requestParams) {
 		this.requestParams = requestParams;
+		return this;
+	}
+
+	public Map<String, List<ApiParam>> getOneOfParams() {
+		return oneOfParams;
+	}
+
+	public ApiMethodReqParam setOneOfParams(Map<String, List<ApiParam>> oneOfParams) {
+		this.oneOfParams = oneOfParams;
 		return this;
 	}
 

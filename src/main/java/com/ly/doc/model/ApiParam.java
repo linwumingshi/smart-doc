@@ -20,13 +20,12 @@
  */
 package com.ly.doc.model;
 
+import com.ly.doc.model.torna.EnumInfo;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import com.ly.doc.model.torna.EnumInfo;
-
-import org.apache.commons.lang3.StringUtils;
 
 import static com.ly.doc.constants.DocGlobalConstants.PARAM_PREFIX;
 
@@ -135,7 +134,15 @@ public class ApiParam {
 	 */
 	private boolean selfReferenceLoop;
 
+	/**
+	 * openApi extensions
+	 */
 	private Map<String, Object> extensions;
+
+	/**
+	 * oneOf api params
+	 */
+	private List<List<ApiParam>> oneOfs;
 
 	public static ApiParam of() {
 		return new ApiParam();
@@ -340,6 +347,15 @@ public class ApiParam {
 		return this;
 	}
 
+	public List<List<ApiParam>> getOneOfs() {
+		return oneOfs;
+	}
+
+	public ApiParam setOneOfs(List<List<ApiParam>> oneOfs) {
+		this.oneOfs = oneOfs;
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return "ApiParam{" + "className='" + className + '\'' + ", id=" + id + ", field='" + field + '\'' + ", type='"
@@ -348,7 +364,7 @@ public class ApiParam {
 				+ ", pathParam=" + pathParam + ", queryParam=" + queryParam + ", value='" + value + '\'' + ", children="
 				+ children + ", hasItems=" + hasItems + ", enumValues=" + enumValues + ", enumInfo=" + enumInfo
 				+ ", maxLength='" + maxLength + '\'' + ", configParam=" + configParam + ", selfReferenceLoop="
-				+ selfReferenceLoop + ", extensions=" + extensions + '}';
+				+ selfReferenceLoop + ", extensions=" + extensions + ", oneOfs=" + oneOfs + '}';
 	}
 
 }

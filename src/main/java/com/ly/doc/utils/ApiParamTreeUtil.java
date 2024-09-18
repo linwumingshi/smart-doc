@@ -27,10 +27,7 @@ import com.ly.doc.model.ApiParam;
 import com.ly.doc.model.ApiReqParam;
 import com.power.common.util.CollectionUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +93,7 @@ public class ApiParamTreeUtil {
 			param.setChildren(getChild(param.getId(), apiParamList, counter));
 		}
 		if (childList.isEmpty()) {
-			return new ArrayList<>(0);
+			return Collections.emptyList();
 		}
 		return childList;
 	}
@@ -165,10 +162,22 @@ public class ApiParamTreeUtil {
 			pathParams.add(apiParam);
 		}
 
+		List<List<ApiParam>> resultOneOfs = new ArrayList<>();
+		bodyParams.stream().map(ApiParam::getOneOfs).filter(CollectionUtil::isNotEmpty).forEach(resultOneOfs::addAll);
+		pathParams.stream().map(ApiParam::getOneOfs).filter(CollectionUtil::isNotEmpty).forEach(resultOneOfs::addAll);
+		queryParams.stream().map(ApiParam::getOneOfs).filter(CollectionUtil::isNotEmpty).forEach(resultOneOfs::addAll);
+
+		// transform to map
+		Map<String, List<ApiParam>> classNameToParamsMap = resultOneOfs.stream()
+			.flatMap(List::stream)
+			// groupBy className
+			.collect(Collectors.groupingBy(ApiParam::getClassName, LinkedHashMap::new, Collectors.toList()));
+
 		return ApiMethodReqParam.builder()
 			.setRequestParams(bodyParams)
 			.setPathParams(pathParams)
-			.setQueryParams(queryParams);
+			.setQueryParams(queryParams)
+			.setOneOfParams(classNameToParamsMap);
 	}
 
 }
