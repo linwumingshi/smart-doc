@@ -714,7 +714,7 @@ public class ParamsBuildHelper extends BaseHelper {
 	 * @param atomicInteger the atomic integer for generating unique IDs
 	 * @return a list of {@link ApiParam} objects
 	 */
-	private static List<ApiParam> buildMapParam(String[] globGicName, String pre, int level, String isRequired,
+	public static List<ApiParam> buildMapParam(String[] globGicName, String pre, int level, String isRequired,
 			boolean isResp, Map<String, String> registryClasses, ProjectDocConfigBuilder projectBuilder,
 			Set<String> groupClasses, Set<String> jsonViewClasses, int pid, boolean jsonRequest, int nextLevel,
 			AtomicInteger atomicInteger) {

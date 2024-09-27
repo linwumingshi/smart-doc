@@ -1049,9 +1049,10 @@ public interface IRestDocTemplate extends IBaseDocBuildTemplate {
 			boolean queryParam = Methods.GET.getValue().equals(docJavaMethod.getMethodType())
 					&& Methods.DELETE.getValue().equals(docJavaMethod.getMethodType()) && !isRequestBody
 					&& !isPathVariable;
+
+			String[] gicNameArr = DocClassUtil.getSimpleGicName(typeName);
 			if (JavaClassValidateUtil.isCollection(fullyQualifiedName)
 					|| JavaClassValidateUtil.isArray(fullyQualifiedName)) {
-				String[] gicNameArr = DocClassUtil.getSimpleGicName(typeName);
 				String gicName = gicNameArr[0];
 				if (JavaClassValidateUtil.isArray(gicName)) {
 					gicName = gicName.substring(0, gicName.indexOf("["));
@@ -1139,72 +1140,30 @@ public interface IRestDocTemplate extends IBaseDocBuildTemplate {
 					docJavaMethod.setRequestSchema(map);
 				}
 			}
+			// if java class is map
 			else if (JavaClassValidateUtil.isMap(fullyQualifiedName)) {
 				log.warning("When using smart-doc, it is not recommended to use Map to receive parameters, Check it in "
 						+ javaMethod.getDeclaringClass().getCanonicalName() + "#" + javaMethod.getName());
+
+				paramList.addAll(ParamsBuildHelper.buildMapParam(gicNameArr, DocGlobalConstants.EMPTY, 0,
+						String.valueOf(required), Boolean.FALSE, new HashMap<>(16), builder, groupClasses,
+						docJavaMethod.getJsonViewClasses(), 0, Boolean.FALSE, 1, null));
+
 				// is map without Gic
 				if (JavaClassValidateUtil.isMap(typeName)) {
-					ApiParam apiParam = ApiParam.of()
-						.setField(paramName)
-						.setType(ParamTypeConstants.PARAM_TYPE_MAP)
-						.setId(paramList.size() + 1)
-						.setPathParam(isPathVariable)
-						.setQueryParam(queryParam)
-						.setDesc(comment.toString())
-						.setRequired(required)
-						.setVersion(DocGlobalConstants.DEFAULT_VERSION);
-					paramList.add(apiParam);
 					if (requestBodyCounter > 0) {
 						Map<String, Object> map = OpenApiSchemaUtil.mapTypeSchema("object");
 						docJavaMethod.setRequestSchema(map);
 					}
 					continue;
 				}
-				String[] gicNameArr = DocClassUtil.getSimpleGicName(typeName);
-
-				// get map key class
-				JavaClass mapKeyClass = builder.getClassByName(gicNameArr[0]);
 
 				if (JavaClassValidateUtil.isPrimitive(gicNameArr[1])) {
-					ApiParam apiParam = ApiParam.of()
-						.setField(paramName)
-						.setType(ParamTypeConstants.PARAM_TYPE_MAP)
-						.setId(paramList.size() + 1)
-						.setPathParam(isPathVariable)
-						.setQueryParam(queryParam)
-						.setDesc(comment.toString())
-						.setRequired(required)
-						.setVersion(DocGlobalConstants.DEFAULT_VERSION);
-					paramList.add(apiParam);
 					if (requestBodyCounter > 0) {
 						Map<String, Object> map = OpenApiSchemaUtil.mapTypeSchema(gicNameArr[1]);
 						docJavaMethod.setRequestSchema(map);
 					}
-				}
-				else if (Objects.nonNull(mapKeyClass) && mapKeyClass.isEnum()
-						&& !mapKeyClass.getEnumConstants().isEmpty()) {
-					for (JavaField enumConstant : mapKeyClass.getEnumConstants()) {
-						ApiParam apiParam = ApiParam.of()
-							.setField(enumConstant.getName())
-							.setType(ParamTypeConstants.PARAM_TYPE_OBJECT)
-							.setClassName(gicNameArr[1])
-							.setDesc(Optional.ofNullable(builder.getClassByName(gicNameArr[1]))
-								.map(JavaClass::getComment)
-								.orElse(DocGlobalConstants.DEFAULT_MAP_KEY_DESC))
-							.setVersion(DocGlobalConstants.DEFAULT_VERSION)
-							.setId(paramList.size() + 1);
-						paramList.add(apiParam);
-						paramList.addAll(ParamsBuildHelper.buildParams(gicNameArr[1], DocGlobalConstants.PARAM_PREFIX,
-								1, String.valueOf(required), Boolean.FALSE, new HashMap<>(16), builder, groupClasses,
-								docJavaMethod.getJsonViewClasses(), apiParam.getId(), Boolean.FALSE, null));
-					}
-				}
-				else {
-					paramList.addAll(ParamsBuildHelper.buildParams(gicNameArr[1], DocGlobalConstants.EMPTY, 0,
-							String.valueOf(required), Boolean.FALSE, new HashMap<>(16), builder, groupClasses,
-							docJavaMethod.getJsonViewClasses(), 0, Boolean.FALSE, null));
-				}
-
+                }
 			}
 			// param is enum
 			else if (javaClass.isEnum()) {
