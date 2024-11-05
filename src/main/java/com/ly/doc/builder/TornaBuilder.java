@@ -33,6 +33,8 @@ import com.ly.doc.utils.TornaUtil;
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +48,8 @@ import static com.ly.doc.constants.TornaConstants.DEFAULT_GROUP_CODE;
  * @author xingzi 2021/2/2 18:05
  **/
 public class TornaBuilder {
+
+	private static final Logger log = LoggerFactory.getLogger(TornaBuilder.class);
 
 	/**
 	 * private constructor
@@ -69,6 +73,7 @@ public class TornaBuilder {
 	 * @param javaProjectBuilder JavaProjectBuilder
 	 */
 	public static void buildApiDoc(ApiConfig config, JavaProjectBuilder javaProjectBuilder) {
+		log.error("Test Push To Torna  TornaBuilder.buildApiDoc");
 		config.setParamsDataToTree(true);
 		List<ApiDoc> apiDocList = generateApiDocs(config, javaProjectBuilder);
 		buildTorna(apiDocList, config, javaProjectBuilder);

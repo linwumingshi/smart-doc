@@ -31,6 +31,8 @@ import com.ly.doc.utils.TornaUtil;
 import com.thoughtworks.qdox.JavaProjectBuilder;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,8 @@ import java.util.List;
  * @author xingzi 2021/4/28 16:14
  */
 public class RpcTornaBuilder {
+
+	private static final Logger log = LoggerFactory.getLogger(RpcTornaBuilder.class);
 
 	/**
 	 * private constructor
@@ -64,6 +68,7 @@ public class RpcTornaBuilder {
 	 * @param javaProjectBuilder ProjectDocConfigBuilder
 	 */
 	public static void buildApiDoc(ApiConfig config, JavaProjectBuilder javaProjectBuilder) {
+		log.error("Test Push To Torna  RpcTornaBuilder.buildApiDoc");
 		RpcDocBuilderTemplate builderTemplate = new RpcDocBuilderTemplate();
 		List<RpcApiDoc> apiDocList = builderTemplate.getApiDoc(false, true, true, config, javaProjectBuilder);
 		buildTorna(apiDocList, config, javaProjectBuilder);
