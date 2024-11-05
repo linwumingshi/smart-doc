@@ -17,6 +17,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Cache Maven Repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -63,6 +70,13 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      - name: Cache Maven Repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Checkout Maven Plugin Repository
         uses: actions/checkout@v4
         with:
@@ -130,6 +144,14 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      - name: Cache Maven Repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
       - name: Checkout Example Project
         uses: actions/checkout@v4
         with:
@@ -253,12 +275,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ ubuntu-latest, macos-latest, windows-latest ]
     concurrency:
       group: generate-grpc-api-doc-${{ matrix.os }}-${{ github.event.pull_request.number }}
       cancel-in-progress: true
 
     steps:
+      - name: Cache Maven Repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
       - name: Checkout Example Project
         uses: actions/checkout@v4
         with:
@@ -339,3 +368,106 @@ jobs:
         with:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
+
+  push-to-torna:
+    needs: maven-plugin-build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: push-to-torna-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout Torna Project
+        uses: actions/checkout@v4
+        with:
+          repository: thc75/torna
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Build and start containers with Docker Compose
+        run: |
+          docker-compose -f torna-docker-compose/docker-compose.yml up -d
+
+
+      - name: Cache Maven Repos
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Checkout Example Project
+        uses: actions/checkout@v4
+        with:
+          repository: smart-doc-group/smart-doc-example-cn
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Create Logs Directory
+        run: mkdir -p logs
+        shell: bash
+
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: smart-doc-maven-plugin-jar
+          path: ./artifacts
+
+      - name: Move Files to Local Maven Repository
+        run: |
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" || "${{ matrix.os }}" == "macos-latest" ]]; then
+            TARGET_DIR=~/.m2/repository/com/ly/smart-doc/
+            mkdir -p "$TARGET_DIR" || echo "Directory already exists"
+            rsync -av --delete ./artifacts/ "$TARGET_DIR"
+          elif [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            TARGET_DIR="$USERPROFILE\\.m2\\repository\\com\\ly\\smart-doc\\"
+            mkdir -p "$TARGET_DIR" || echo "Directory already exists"
+            cp -r ./artifacts/* "$TARGET_DIR"
+          fi
+        shell: bash
+
+
+      - name: Update Smart-Doc Version in pom.xml
+        run: |
+          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+
+      - name: Build and Install Example Project
+        run: |
+          mvn -DskipTests=true install 2>&1 | tee logs/build-example-project.log
+          if grep -E "\[ERROR\]" logs/build-example-project.log; then
+            cat logs/build-example-project.log
+            exit 1
+          fi
+        shell: bash
+
+      - name: Push Rest Api To Torna
+        run: |
+          mvn -DskipTests=true smart-doc:torna-rest 2>&1 | tee logs/torna-rest.log
+          if grep -E "\[ERROR\]" logs/torna-rest.log; then cat logs/torna-rest.log; exit 1; fi
+        shell: bash
+
+      - name: Push RPC Api To Torna
+        run: |
+          mvn -DskipTests=true smart-doc:torna-rpc 2>&1 | tee logs/torna-rpc.log
+          if grep -E "\[ERROR\]" logs/torna-rpc.log; then cat logs/torna-rpc.log; exit 1; fi
+        shell: bash
+
+      - name: Upload Push Torna API Log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: error-log-${{ runner.os }}-torna-api-doc
+          path: logs
+
