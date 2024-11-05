@@ -13,7 +13,6 @@ env:
 
 jobs:
   build:
-    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
     runs-on: ubuntu-latest
 
     steps:
