@@ -55,11 +55,11 @@ jobs:
           name: error-log-smart-doc-build
           path: logs/build.log
 
-  maven-plugin-build:
+  maven_plugin_build:
     needs: build
     runs-on: ubuntu-latest
     concurrency:
-      group: maven-plugin-build-${{ github.event.pull_request.number }}
+      group: maven_plugin_build-${{ github.event.pull_request.number }}
       cancel-in-progress: true
 
     steps:
@@ -116,11 +116,11 @@ jobs:
         if: failure() # Only run if previous steps fail
         uses: actions/upload-artifact@v4
         with:
-          name: error-log-maven-plugin-build
+          name: error-log-maven_plugin_build
           path: logs/install-plugin.log
 
-  generate-api-docs:
-    needs: maven-plugin-build
+  generate_api_docs:
+    needs: maven_plugin_build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -248,14 +248,14 @@ jobs:
           name: error-log-${{ matrix.doc_type }}-api-docs
           path: logs
 
-  generate-grpc-api-doc:
-    needs: maven-plugin-build
+  generate_grpc_api_doc:
+    needs: maven_plugin_build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     concurrency:
-      group: generate-grpc-api-doc-${{ matrix.os }}-${{ github.event.pull_request.number }}
+      group: generate_grpc_api_doc-${{ matrix.os }}-${{ github.event.pull_request.number }}
       cancel-in-progress: true
 
     steps:
@@ -341,7 +341,7 @@ jobs:
           path: logs
 
   post-comment:
-    needs: [build, maven-plugin-build, generate-api-docs, generate-grpc-api-doc]  # 列出所有需要的 job
+    needs: [build, maven_plugin_build, generate_api_docs, generate_grpc_api_doc]
     runs-on: ubuntu-latest
     steps:
       - name: Post the workflow results as a comment on the PR
@@ -350,24 +350,37 @@ jobs:
           script: |
             const prNumber = ${{ github.event.pull_request.number }}
             
-            // 获取每个 job 的状态
-            const jobStatus = (jobName) => {
-              const job = ${{ github.jobs[jobName] }}
-              return job ? job.result === 'success' ? '✅ Success' : '❌ Failed' : '❓ Job not found'
-            }
-            
-            let message = `### Workflow Status: ${jobStatus('build')}\n\n`
+            let message = `### Workflow Status: ${
+              ${{ needs.build.result }} === 'success' ? '✅ Success' : '❌ Failed'
+            }\n\n`
             message += `Here are the results for each job:\n`
             
-            const jobs = ['build', 'maven-plugin-build', 'generate-api-docs', 'generate-grpc-api-doc']
-            jobs.forEach((jobName) => {
-              const status = jobStatus(jobName)
-              message += `- **${jobName}**: ${status}\n`
-              if (status === '❌ Failed') {
-                message += `  You can find the logs here: [Job Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
-              }
-            })
-            
+            // 直接列出每个 job 的状态
+            const buildStatus = ${{ needs.build.result }} === 'success' ? '✅ Success' : '❌ Failed'
+            const mavenPluginBuildStatus = ${{ needs.maven_plugin_build.result }} === 'success' ? '✅ Success' : '❌ Failed'
+            const generateApiDocsStatus = ${{ needs.generate_api_docs.result }} === 'success' ? '✅ Success' : '❌ Failed'
+            const generateGrpcApiDocStatus = ${{ needs.generate_grpc_api_doc.result }} === 'success' ? '✅ Success' : '❌ Failed'
+  
+            message += `- **build**: ${buildStatus}\n`
+            if (buildStatus === '❌ Failed') {
+              message += `  You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            }
+  
+            message += `- **maven_plugin_build**: ${mavenPluginBuildStatus}\n`
+            if (mavenPluginBuildStatus === '❌ Failed') {
+              message += `  You can find the logs here: [Maven Plugin Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            }
+  
+            message += `- **generate_api_docs**: ${generateApiDocsStatus}\n`
+            if (generateApiDocsStatus === '❌ Failed') {
+              message += `  You can find the logs here: [Generate API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            }
+  
+            message += `- **generate_grpc_api_doc**: ${generateGrpcApiDocStatus}\n`
+            if (generateGrpcApiDocStatus === '❌ Failed') {
+              message += `  You can find the logs here: [Generate gRPC API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            }
+  
             // Post comment to PR
             await github.rest.issues.createComment({
               issue_number: prNumber,
