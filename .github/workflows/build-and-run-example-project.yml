@@ -341,7 +341,7 @@ jobs:
           path: logs
 
   post-comment:
-    needs: build
+    needs: [build,maven-plugin-build, generate-api-docs, generate-grpc-api-doc]
     runs-on: ubuntu-latest
     steps:
       - name: Post the workflow results as a comment on the PR
@@ -349,20 +349,19 @@ jobs:
         with:
           script: |
             const prNumber = ${{ github.event.pull_request.number }}
-            const status = ${{ job.status }}
-            const jobName = "Build and Run Example Project"
             
-            let message = `### Workflow Status: ${status}\n\n`
-            message += `Job: **${jobName}**\n`
-            message += `Step results:\n`
+            let message = `### Workflow Status: ${${{ job.status }} === 'success' ? 'Success' : 'Failed'}\n\n`
+            message += `Here are the results for each job:\n`
             
-            if (status === 'success') {
-              message += `All steps completed successfully. ✅\n`
-            } else {
-              message += `Some steps failed. ❌ Please check the logs for details.\n`
-              message += `You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            const jobs = ['build', 'test', 'deploy'];
+            for (let jobName of jobs) {
+              const status = ${{ needs[jobName].result }}
+              message += `- **${jobName}**: ${status === 'success' ? '✅ Success' : '❌ Failed'}\n`
+              if (status === 'failure') {
+                message += `  You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+              }
             }
-
+            
             // Post comment to PR
             await github.rest.issues.createComment({
               issue_number: prNumber,
