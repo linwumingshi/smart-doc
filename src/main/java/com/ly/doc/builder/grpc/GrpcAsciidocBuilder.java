@@ -68,6 +68,7 @@ public class GrpcAsciidocBuilder {
 	 * @param javaProjectBuilder ProjectDocConfigBuilder
 	 */
 	public static void buildApiDoc(ApiConfig config, JavaProjectBuilder javaProjectBuilder) {
+		System.out.println("===============Test PR");
 		GrpcDocBuilderTemplate grpcDocBuilderTemplate = new GrpcDocBuilderTemplate();
 		List<GrpcApiDoc> apiDocList = grpcDocBuilderTemplate.getApiDoc(true, true, false, config, javaProjectBuilder);
 		if (config.isAllInOne()) {

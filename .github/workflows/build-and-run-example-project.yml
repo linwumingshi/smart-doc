@@ -13,7 +13,7 @@ env:
 
 jobs:
   build:
-    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
+#    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
     runs-on: ubuntu-latest
 
     steps:
@@ -339,3 +339,34 @@ jobs:
         with:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
+
+  post-comment:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post the workflow results as a comment on the PR
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = ${{ github.event.pull_request.number }}
+            const status = ${{ job.status }}
+            const jobName = "Build and Run Example Project"
+            
+            let message = `### Workflow Status: ${status}\n\n`
+            message += `Job: **${jobName}**\n`
+            message += `Step results:\n`
+            
+            if (status === 'success') {
+              message += `All steps completed successfully. ✅\n`
+            } else {
+              message += `Some steps failed. ❌ Please check the logs for details.\n`
+              message += `You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            }
+
+            // Post comment to PR
+            await github.rest.issues.createComment({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
