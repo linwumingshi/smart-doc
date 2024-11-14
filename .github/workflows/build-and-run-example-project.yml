@@ -341,7 +341,7 @@ jobs:
           path: logs
 
   post-comment:
-    needs: [build,maven-plugin-build, generate-api-docs, generate-grpc-api-doc]
+    needs: [build, maven-plugin-build, generate-api-docs, generate-grpc-api-doc]  # 列出所有需要的 job
     runs-on: ubuntu-latest
     steps:
       - name: Post the workflow results as a comment on the PR
@@ -353,37 +353,37 @@ jobs:
             let message = `### Workflow Status: ${${{ job.status }} === 'success' ? 'Success' : 'Failed'}\n\n`
             message += `Here are the results for each job:\n`
             
-             // 手动列出每个 job
+            // 手动列出每个 job 的状态
             const buildStatus = ${{ needs.build.result }}
             const mavenPluginBuildStatus = ${{ needs.maven-plugin-build.result }}
             const generateApiDocsStatus = ${{ needs.generate-api-docs.result }}
             const generateGrpcApiDocStatus = ${{ needs.generate-grpc-api-doc.result }}
             
             // 添加每个 job 的状态到评论
-            message += `- **build**: ${buildStatus === 'success' ? '✅ Success' : '❌ Failed'}\n`
-            if (buildStatus === 'failure') {
-            message += `  You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            message += `- **build**: ${{ needs.build.result === 'success' ? '✅ Success' : '❌ Failed' }}\n`
+            if (${{ needs.build.result }} === 'failure') {
+              message += `  You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
             }
   
-            message += `- **maven-plugin-build**: ${mavenPluginBuildStatus === 'success' ? '✅ Success' : '❌ Failed'}\n`
-            if (mavenPluginBuildStatus === 'failure') {
-            message += `  You can find the logs here: [Maven Plugin Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            message += `- **maven-plugin-build**: ${{ needs.maven-plugin-build.result === 'success' ? '✅ Success' : '❌ Failed' }}\n`
+            if (${{ needs.maven-plugin-build.result }} === 'failure') {
+              message += `  You can find the logs here: [Maven Plugin Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
             }
   
-            message += `- **generate-api-docs**: ${generateApiDocsStatus === 'success' ? '✅ Success' : '❌ Failed'}\n`
-            if (generateApiDocsStatus === 'failure') {
-            message += `  You can find the logs here: [Generate API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            message += `- **generate-api-docs**: ${{ needs.generate-api-docs.result === 'success' ? '✅ Success' : '❌ Failed' }}\n`
+            if (${{ needs.generate-api-docs.result }} === 'failure') {
+              message += `  You can find the logs here: [Generate API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
             }
   
-            message += `- **generate-grpc-api-doc**: ${generateGrpcApiDocStatus === 'success' ? '✅ Success' : '❌ Failed'}\n`
-            if (generateGrpcApiDocStatus === 'failure') {
-            message += `  You can find the logs here: [Generate gRPC API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            message += `- **generate-grpc-api-doc**: ${{ needs.generate-grpc-api-doc.result === 'success' ? '✅ Success' : '❌ Failed' }}\n`
+            if (${{ needs.generate-grpc-api-doc.result }} === 'failure') {
+              message += `  You can find the logs here: [Generate gRPC API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
             }
   
             // Post comment to PR
             await github.rest.issues.createComment({
-            issue_number: prNumber,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: message
-          })
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: message
+            })
