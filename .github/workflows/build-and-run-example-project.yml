@@ -350,22 +350,8 @@ jobs:
           script: |
             const prNumber = ${{ github.event.pull_request.number }}
   
-            // 获取每个 job 的状态
-            const buildStatus = ${{ needs.build.result }}
-            const mavenPluginBuildStatus = ${{ needs.maven_plugin_build.result }}
-            const generateApiDocsStatus = ${{ needs.generate_api_docs.result }}
-            const generateGrpcApiDocStatus = ${{ needs.generate_grpc_api_doc.result }}
-            
-            // 打印每个 job 的状态
-            console.log(`buildStatus: ${buildStatus}`)
-            console.log(`mavenPluginBuildStatus: ${mavenPluginBuildStatus}`)
-            console.log(`generateApiDocsStatus: ${generateApiDocsStatus}`)
-            console.log(`generateGrpcApiDocStatus: ${generateGrpcApiDocStatus}`)
-  
             // 创建消息并根据状态填充
-            let message = `### Workflow Status: ${
-              buildStatus === 'success' ? '✅ Success' : '❌ Failed'
-            }\n\n`
+            let message = `### Workflow Status: \n\n`
             message += `Here are the results for each job:\n`
   
             // 直接列出每个 job 的状态
@@ -378,10 +364,10 @@ jobs:
             }
   
             // 添加每个 job 的状态信息到消息中
-            message += createJobMessage('build', buildStatus)
-            message += createJobMessage('maven_plugin_build', mavenPluginBuildStatus)
-            message += createJobMessage('generate_api_docs', generateApiDocsStatus)
-            message += createJobMessage('generate_grpc_api_doc', generateGrpcApiDocStatus)
+            message += createJobMessage('build', ${{ needs.build.result }})
+            message += createJobMessage('maven_plugin_build', ${{ needs.maven_plugin_build.result }})
+            message += createJobMessage('generate_api_docs', ${{ needs.generate_api_docs.result }})
+            message += createJobMessage('generate_grpc_api_doc', ${{ needs.generate_grpc_api_doc.result }})
   
             // Post comment to PR
             await github.rest.issues.createComment({
