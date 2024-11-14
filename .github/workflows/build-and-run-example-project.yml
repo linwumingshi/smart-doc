@@ -340,7 +340,7 @@ jobs:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
 
-  post-comment:
+  post_comment:
     needs: [build, maven_plugin_build, generate_api_docs, generate_grpc_api_doc]
     runs-on: ubuntu-latest
     steps:
@@ -355,6 +355,12 @@ jobs:
             const mavenPluginBuildStatus = ${{ needs.maven_plugin_build.result }}
             const generateApiDocsStatus = ${{ needs.generate_api_docs.result }}
             const generateGrpcApiDocStatus = ${{ needs.generate_grpc_api_doc.result }}
+            
+            // 打印每个 job 的状态
+            console.log(`buildStatus: ${buildStatus}`)
+            console.log(`mavenPluginBuildStatus: ${mavenPluginBuildStatus}`)
+            console.log(`generateApiDocsStatus: ${generateApiDocsStatus}`)
+            console.log(`generateGrpcApiDocStatus: ${generateGrpcApiDocStatus}`)
   
             // 创建消息并根据状态填充
             let message = `### Workflow Status: ${
