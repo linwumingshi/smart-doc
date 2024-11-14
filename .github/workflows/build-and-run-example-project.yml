@@ -349,37 +349,33 @@ jobs:
         with:
           script: |
             const prNumber = ${{ github.event.pull_request.number }}
-            
+  
+            // 获取每个 job 的状态
+            const buildStatus = ${{ needs.build.result }}
+            const mavenPluginBuildStatus = ${{ needs.maven_plugin_build.result }}
+            const generateApiDocsStatus = ${{ needs.generate_api_docs.result }}
+            const generateGrpcApiDocStatus = ${{ needs.generate_grpc_api_doc.result }}
+  
+            // 创建消息并根据状态填充
             let message = `### Workflow Status: ${
-              ${{ needs.build.result }} === 'success' ? '✅ Success' : '❌ Failed'
+              buildStatus === 'success' ? '✅ Success' : '❌ Failed'
             }\n\n`
             message += `Here are the results for each job:\n`
-            
+  
             // 直接列出每个 job 的状态
-            const buildStatus = ${{ needs.build.result }} === 'success' ? '✅ Success' : '❌ Failed'
-            const mavenPluginBuildStatus = ${{ needs.maven_plugin_build.result }} === 'success' ? '✅ Success' : '❌ Failed'
-            const generateApiDocsStatus = ${{ needs.generate_api_docs.result }} === 'success' ? '✅ Success' : '❌ Failed'
-            const generateGrpcApiDocStatus = ${{ needs.generate_grpc_api_doc.result }} === 'success' ? '✅ Success' : '❌ Failed'
-  
-            message += `- **build**: ${buildStatus}\n`
-            if (buildStatus === '❌ Failed') {
-              message += `  You can find the logs here: [Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+            const createJobMessage = (jobName, status) => {
+              let jobMessage = `- **${jobName}**: ${status === 'success' ? '✅ Success' : '❌ Failed'}\n`
+              if (status === 'failure') {
+                jobMessage += `  You can find the logs here: [${jobName} Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
+              }
+              return jobMessage
             }
   
-            message += `- **maven_plugin_build**: ${mavenPluginBuildStatus}\n`
-            if (mavenPluginBuildStatus === '❌ Failed') {
-              message += `  You can find the logs here: [Maven Plugin Build Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
-            }
-  
-            message += `- **generate_api_docs**: ${generateApiDocsStatus}\n`
-            if (generateApiDocsStatus === '❌ Failed') {
-              message += `  You can find the logs here: [Generate API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
-            }
-  
-            message += `- **generate_grpc_api_doc**: ${generateGrpcApiDocStatus}\n`
-            if (generateGrpcApiDocStatus === '❌ Failed') {
-              message += `  You can find the logs here: [Generate gRPC API Docs Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\n`
-            }
+            // 添加每个 job 的状态信息到消息中
+            message += createJobMessage('build', buildStatus)
+            message += createJobMessage('maven_plugin_build', mavenPluginBuildStatus)
+            message += createJobMessage('generate_api_docs', generateApiDocsStatus)
+            message += createJobMessage('generate_grpc_api_doc', generateGrpcApiDocStatus)
   
             // Post comment to PR
             await github.rest.issues.createComment({
