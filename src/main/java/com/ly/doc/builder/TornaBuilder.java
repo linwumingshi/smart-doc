@@ -69,6 +69,7 @@ public class TornaBuilder {
 	 * @param javaProjectBuilder JavaProjectBuilder
 	 */
 	public static void buildApiDoc(ApiConfig config, JavaProjectBuilder javaProjectBuilder) {
+		System.out.println("================================");
 		config.setParamsDataToTree(true);
 		List<ApiDoc> apiDocList = generateApiDocs(config, javaProjectBuilder);
 		buildTorna(apiDocList, config, javaProjectBuilder);
