@@ -247,8 +247,6 @@ jobs:
         with:
           name: error-log-${{ matrix.doc_type }}-api-docs
           path: logs
-    outputs:
-      doc_results: ${{ steps.generate-api-docs.outputs.doc_results }}
 
 
   generate-grpc-api-doc:
@@ -342,9 +340,6 @@ jobs:
         with:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
-    outputs:
-      doc_results: ${{ steps.generate-grpc-api-doc.outputs.doc_results }}
-
 
   write-comment:
     if: ${{ always() }}
@@ -357,8 +352,6 @@ jobs:
         id: set-status
         run: |
           job_status=""
-          api_docs_status=""
-          grpc_docs_status=""
           
           # Set the job status message
           if [ ${{ needs.build.result }} == 'success' ] && [ ${{ needs.maven-plugin-build.result }} == 'success' ] && [ ${{ needs.generate-api-docs.result }} == 'success' ] && [ ${{ needs.generate-grpc-api-doc.result }} == 'success' ]; then
@@ -366,43 +359,26 @@ jobs:
           else
             job_status=":x: Some jobs failed. Please check the details."
           fi
-  
-          # Debugging: Output the doc_results to see if it is set properly
-          echo "generate-api-docs doc_results: ${{ needs.generate-api-docs.outputs.doc_results }}" >> $GITHUB_ENV
-          echo "generate-grpc-api-doc doc_results: ${{ needs.generate-grpc-api-doc.outputs.doc_results }}" >> $GITHUB_ENV
-  
-          # Check if doc_results exists and is not empty before parsing
-          if [ -n "${{ needs.generate-api-docs.outputs.doc_results }}" ]; then
-            api_docs_status=""
-            doc_results="${{ fromJson(needs.generate-api-docs.outputs.doc_results) }}"
-            for doc_type in $(echo "${doc_results}" | jq -r 'keys[]'); do
-              result=$(echo "$doc_results" | jq -r ".${doc_type}.status")
-              if [ "$result" == "success" ]; then
-                api_docs_status+="- ${doc_type}: ✅ Generate API Docs succeeded\n"
-              else
-                api_docs_status+="- ${doc_type}: ❌ Generate API Docs failed\n"
-              fi
-            done
+          
+          for doc_type in rest dubbo javadoc websocket; do
+          # Check the result of the specific doc_type from generate-api-docs
+          if [ "${{ needs.generate-api-docs.outputs[doc_type] }}" == 'success' ]; then
+            api_docs_status+="- Generate API Docs for $doc_type: ✅ Success\n"
           else
-            api_docs_status="- Generate API Docs did not produce any results.\n"
+            api_docs_status+="- Generate API Docs for $doc_type: ❌ Failed\n"
           fi
-  
-          # Check if grpc_results exists and is not empty before parsing
-          if [ -n "${{ needs.generate-grpc-api-doc.outputs.doc_results }}" ]; then
-            grpc_docs_status=""
-            grpc_results="${{ fromJson(needs.generate-grpc-api-doc.outputs.doc_results) }}"
-            for os in $(echo "${grpc_results}" | jq -r 'keys[]'); do
-              result=$(echo "$grpc_results" | jq -r ".${os}.status")
-              if [ "$result" == "success" ]; then
-                grpc_docs_status+="- ${os}: ✅ Generate gRPC API Docs succeeded\n"
-              else
-                grpc_docs_status+="- ${os}: ❌ Generate gRPC API Docs failed\n"
-              fi
-            done
-          else
-            grpc_docs_status="- Generate gRPC API Docs did not produce any results.\n"
-          fi
-  
+          done
+          
+          for os in ubuntu-latest macos-latest windows-latest; do
+            if [ "${{ needs.generate-grpc-api-doc.outputs[os] }}" == 'success' ]; then
+              grpc_docs_status+="- Generate gRPC API Docs for $os: ✅ Success\n"
+            else
+              grpc_docs_status+="- Generate gRPC API Docs for $os: ❌ Failed\n"
+            fi
+          done
+          
+          
+
           # Save the final job status and parsed statuses to GitHub environment variables
           echo "job_status=$job_status" >> $GITHUB_ENV
           echo "api_docs_status=$api_docs_status" >> $GITHUB_ENV
@@ -425,11 +401,8 @@ jobs:
             - ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }} - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
             - ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }} - generate-api-docs: ${{ needs.generate-api-docs.result }}
             - ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }} - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
-            
-            
-            
+
             - generate-api-docs:
               ${{ env.api_docs_status }}
             - generate-grpc-api-doc:
               ${{ env.grpc_docs_status }}
-
