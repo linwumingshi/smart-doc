@@ -371,11 +371,9 @@ jobs:
             ${{ env.job_status }}  
             [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
-            - ${{ needs.build.result == 'success' && '✅' || '❌' }} - build: {{ needs.build.result }}
-            - ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }} - maven-plugin-build:  {{ needs.maven-plugin-build.result }}
-           
-            - generate-api-docs:
-            ${{ fromJson(needs.generate-api-docs.outputs.doc_results) | map(i => '✅' if i.status == 'success' else '❌') | join(' ') }}
+            - ${{ needs.build.result == 'success' && '✅' || '❌' }} - build: ${{ needs.build.result }}
+            - ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }} - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
+            - ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }} - generate-api-docs: ${{ needs.generate-api-docs.result }}
+            - ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }} - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
             
-            - generate-grpc-api-doc:
-              ${{ fromJson(needs.generate-grpc-api-doc.outputs.doc_results) | map(i => '✅' if i.status == 'success' else '❌') | join(' ') }}
+
