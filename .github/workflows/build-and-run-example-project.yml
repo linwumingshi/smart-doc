@@ -11,8 +11,6 @@ on:
 env:
   SMART_DOC_VERSION: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
   PR_NUMBER: ${{ github.event.pull_request.number }} # Get the PR number
-  HEADER_PARAMS_WRITE_COMMENT: "-H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer ${{ secrets.ACTION_TOKEN }}\" -H \"X-GitHub-Api-Version: 2022-11-28\""
-  BASE_URL_SMART_DOC: https://api.github.com/repos/${GITHUB_REPOSITORY}
 
 jobs:
   build:
@@ -370,10 +368,14 @@ jobs:
           status: ${{ env.job_status }}
           id: comment on the pull request
           message: |
-            - build: ${{ needs.build.result == 'success' && '✅' || '❌' }}
-            - maven-plugin-build: ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }}
-            - generate-api-docs: ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }}
-            - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }}
-            
             ${{ env.job_status }}  
             [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            - ${{ needs.build.result == 'success' && '✅' || '❌' }} - build: {{ needs.build.result }}
+            - ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }} - maven-plugin-build:  {{ needs.maven-plugin-build.result }}
+           
+            - generate-api-docs:
+            ${{ fromJson(needs.generate-api-docs.outputs.doc_results) | map(i => '✅' if i.status == 'success' else '❌') | join(' ') }}
+            
+            - generate-grpc-api-doc:
+              ${{ fromJson(needs.generate-grpc-api-doc.outputs.doc_results) | map(i => '✅' if i.status == 'success' else '❌') | join(' ') }}
