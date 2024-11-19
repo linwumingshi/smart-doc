@@ -355,8 +355,33 @@ jobs:
             job_status=":green_heart: All jobs completed successfully! :tada:"
           else
             job_status=":x: Some jobs failed. Please check the details."
-          fi
+          fi    
+ 
+          api_docs_status=""
+          doc_results="${{ fromJson(needs.generate-api-docs.outputs.doc_results) }}"
+          for doc_type in $(echo "${doc_results}" | jq -r 'keys[]'); do
+            result=$(echo "$doc_results" | jq -r ".${doc_type}.status")
+            if [ "$result" == "success" ]; then
+              api_docs_status+="- ${doc_type}: ✅ Generate API Docs succeeded\n"
+            else
+              api_docs_status+="- ${doc_type}: ❌ Generate API Docs failed\n"
+            fi
+          done
+  
+          grpc_docs_status=""
+          grpc_results="${{ fromJson(needs.generate-grpc-api-doc.outputs.doc_results) }}"
+          for os in $(echo "${grpc_results}" | jq -r 'keys[]'); do
+            result=$(echo "$grpc_results" | jq -r ".${os}.status")
+            if [ "$result" == "success" ]; then
+              grpc_docs_status+="- ${os}: ✅ Generate gRPC API Docs succeeded\n"
+            else
+              grpc_docs_status+="- ${os}: ❌ Generate gRPC API Docs failed\n"
+            fi
+          done
+          
           echo "job_status=$job_status" >> $GITHUB_ENV
+          echo "api_docs_status=$api_docs_status" >> $GITHUB_ENV
+          echo "grpc_docs_status=$grpc_docs_status" >> $GITHUB_ENV
 
       - name: comment on the pull request
         uses: hasura/comment-progress@v2.3.0
@@ -376,4 +401,10 @@ jobs:
             - ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }} - generate-api-docs: ${{ needs.generate-api-docs.result }}
             - ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }} - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
             
+            
+            
+            - generate-api-docs:
+              ${{ env.api_docs_status }}
+            - generate-grpc-api-doc:
+              ${{ env.grpc_docs_status }}
 
