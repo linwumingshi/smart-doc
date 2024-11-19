@@ -359,30 +359,8 @@ jobs:
           else
             job_status=":x: Some jobs failed. Please check the details."
           fi
-          
-          for doc_type in rest dubbo javadoc websocket; do
-          # Check the result of the specific doc_type from generate-api-docs
-          if [ "${{ needs.generate-api-docs.outputs[doc_type] }}" == 'success' ]; then
-            api_docs_status+="- Generate API Docs for $doc_type: ✅ Success\n"
-          else
-            api_docs_status+="- Generate API Docs for $doc_type: ❌ Failed\n"
-          fi
-          done
-          
-          for os in ubuntu-latest macos-latest windows-latest; do
-            if [ "${{ needs.generate-grpc-api-doc.outputs[os] }}" == 'success' ]; then
-              grpc_docs_status+="- Generate gRPC API Docs for $os: ✅ Success\n"
-            else
-              grpc_docs_status+="- Generate gRPC API Docs for $os: ❌ Failed\n"
-            fi
-          done
-          
-          
-
-          # Save the final job status and parsed statuses to GitHub environment variables
+            
           echo "job_status=$job_status" >> $GITHUB_ENV
-          echo "api_docs_status=$api_docs_status" >> $GITHUB_ENV
-          echo "grpc_docs_status=$grpc_docs_status" >> $GITHUB_ENV
 
       - name: Comment on the pull request
         uses: hasura/comment-progress@v2.3.0
@@ -401,8 +379,3 @@ jobs:
             - ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }} - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
             - ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }} - generate-api-docs: ${{ needs.generate-api-docs.result }}
             - ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }} - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
-
-            - generate-api-docs:
-              ${{ env.api_docs_status }}
-            - generate-grpc-api-doc:
-              ${{ env.grpc_docs_status }}
