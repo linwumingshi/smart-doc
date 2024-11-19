@@ -9,11 +9,13 @@ on:
       - 'pom.xml'         # Trigger workflow only if pom.xml file changes
 
 env:
-  smart-doc-version: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
+  SMART_DOC_VERSION: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
+  PR_NUMBER: ${{ github.event.pull_request.number }} # Get the PR number
+  HEADER_PARAMS_WRITE_COMMENT: "-H \"Accept: application/vnd.github+json\" -H \"Authorization: Bearer ${{ secrets.ACTION_TOKEN }}\" -H \"X-GitHub-Api-Version: 2022-11-28\""
+  BASE_URL_SMART_DOC: https://api.github.com/repos/${GITHUB_REPOSITORY}
 
 jobs:
   build:
-    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
     runs-on: ubuntu-latest
 
     steps:
@@ -30,7 +32,7 @@ jobs:
         run: mkdir -p logs
 
       - name: Update Version in pom.xml
-        run: mvn versions:set -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+        run: mvn versions:set -DnewVersion="${{ env.SMART_DOC_VERSION }}" -DgenerateBackupPoms=false
 
       - name: Build and Install Plugin
         run: |
@@ -94,7 +96,7 @@ jobs:
 
       - name: Update Version in pom.xml
         run: |
-          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.SMART_DOC_VERSION }}" -DgenerateBackupPoms=false
 
       - name: Build and Install
         run: |
@@ -161,7 +163,7 @@ jobs:
 
       - name: Update Smart-Doc Version in pom.xml
         run: |
-          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.SMART_DOC_VERSION }}" -DgenerateBackupPoms=false
 
       - name: Build and Install Example Project
         run: |
@@ -297,7 +299,7 @@ jobs:
 
       - name: Update Smart-Doc Version in pom.xml
         run: |
-          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.smart-doc-version }}" -DgenerateBackupPoms=false
+          mvn versions:set-property -Dproperty="smart-doc.version" -DnewVersion="${{ env.SMART_DOC_VERSION }}" -DgenerateBackupPoms=false
 
       - name: Build and Install Example Project
         run: |
@@ -339,3 +341,35 @@ jobs:
         with:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
+
+  write-comment:
+    if: ${{ always() }}
+    name: write comment to pr
+    needs: [build, maven-plugin-build, generate-api-docs, generate-grpc-api-doc]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: comment on the pull request
+        uses: hasura/comment-progress@v2.3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          number: ${{ github.event.number }}
+          pr-number: ${{ env.PR_NUMBER }}
+          status: ${{ job.status }}
+          id: comment on the pull request
+          message: |
+            # 任务执行状态
+            - build: ${{ needs.build.result }}
+            - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
+            - generate-api-docs: ${{ needs.generate-api-docs.result }}
+            - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
+  
+            # 总体状态
+            ${{ if needs.build.result == 'success' && needs.maven-plugin-build.result == 'success' && needs.generate-api-docs.result == 'success' && needs.generate-grpc-api-doc.result == 'success' }}:
+            :green_heart: All jobs completed successfully! :tada:
+            [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            ${{ else }}:
+            :x: Some jobs failed. Please check the details.
+            [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
