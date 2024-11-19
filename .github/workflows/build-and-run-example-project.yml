@@ -247,6 +247,9 @@ jobs:
         with:
           name: error-log-${{ matrix.doc_type }}-api-docs
           path: logs
+    outputs:
+      doc_results: ${{ steps.generate-api-docs.outputs.doc_results }}
+
 
   generate-grpc-api-doc:
     needs: maven-plugin-build
@@ -339,6 +342,9 @@ jobs:
         with:
           name: error-log-${{ runner.os }}-grpc-api-doc
           path: logs
+    outputs:
+      doc_results: ${{ steps.generate-grpc-api-doc.outputs.doc_results }}
+
 
   write-comment:
     if: ${{ always() }}
