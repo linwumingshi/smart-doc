@@ -353,40 +353,11 @@ jobs:
         id: set-status
         run: |
           job_status=""
-  
-          # 构建每个任务的状态信息，带有 emoji
-          if [ ${{ needs.build.result }} == 'success' ]; then
-            job_status+="✅ build\n"
-          else
-            job_status+="❌ build\n"
-          fi
-  
-          if [ ${{ needs.maven-plugin-build.result }} == 'success' ]; then
-            job_status+="✅ maven-plugin-build\n"
-          else
-            job_status+="❌ maven-plugin-build\n"
-          fi
-  
-          if [ ${{ needs.generate-api-docs.result }} == 'success' ]; then
-            job_status+="✅ generate-api-docs\n"
-          else
-            job_status+="❌ generate-api-docs\n"
-          fi
-  
-          if [ ${{ needs.generate-grpc-api-doc.result }} == 'success' ]; then
-            job_status+="✅ generate-grpc-api-doc\n"
-          else
-            job_status+="❌ generate-grpc-api-doc\n"
-          fi
-  
-          # 设置最终状态消息
           if [ ${{ needs.build.result }} == 'success' ] && [ ${{ needs.maven-plugin-build.result }} == 'success' ] && [ ${{ needs.generate-api-docs.result }} == 'success' ] && [ ${{ needs.generate-grpc-api-doc.result }} == 'success' ]; then
             job_status=":green_heart: All jobs completed successfully! :tada:"
           else
             job_status=":x: Some jobs failed. Please check the details."
           fi
-  
-          # 保存状态消息到环境变量
           echo "job_status=$job_status" >> $GITHUB_ENV
 
       - name: comment on the pull request
@@ -396,12 +367,13 @@ jobs:
           repository: ${{ github.repository }}
           number: ${{ github.event.number }}
           pr-number: ${{ env.PR_NUMBER }}
-          status: ${{ job.status }}
+          status: ${{ job_status }}
+          id: comment on the pull request
           message: |
-            - build: ${{ needs.build.result }}
-            - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
-            - generate-api-docs: ${{ needs.generate-api-docs.result }}
-            - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
-  
+            - build: ${{ needs.build.result == 'success' && '✅' || '❌' }}
+            - maven-plugin-build: ${{ needs.maven-plugin-build.result == 'success' && '✅' || '❌' }}
+            - generate-api-docs: ${{ needs.generate-api-docs.result == 'success' && '✅' || '❌' }}
+            - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result == 'success' && '✅' || '❌' }}
+            
             ${{ env.job_status }}  
             [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
