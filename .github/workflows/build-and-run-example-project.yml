@@ -367,7 +367,7 @@ jobs:
           repository: ${{ github.repository }}
           number: ${{ github.event.number }}
           pr-number: ${{ env.PR_NUMBER }}
-          status: ${{ job_status }}
+          status: ${{ env.job_status }}
           id: comment on the pull request
           message: |
             - build: ${{ needs.build.result == 'success' && '✅' || '❌' }}
