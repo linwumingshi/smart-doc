@@ -359,17 +359,8 @@ jobs:
           status: ${{ job.status }}
           id: comment on the pull request
           message: |
-            # 任务执行状态
             - build: ${{ needs.build.result }}
             - maven-plugin-build: ${{ needs.maven-plugin-build.result }}
             - generate-api-docs: ${{ needs.generate-api-docs.result }}
             - generate-grpc-api-doc: ${{ needs.generate-grpc-api-doc.result }}
-  
-            # 总体状态
-            ${{ if needs.build.result == 'success' && needs.maven-plugin-build.result == 'success' && needs.generate-api-docs.result == 'success' && needs.generate-grpc-api-doc.result == 'success' }}:
-            :green_heart: All jobs completed successfully! :tada:
-            [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            ${{ else }}:
-            :x: Some jobs failed. Please check the details.
-            [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
 
