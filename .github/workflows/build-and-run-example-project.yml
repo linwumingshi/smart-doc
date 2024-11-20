@@ -13,7 +13,6 @@ env:
 
 jobs:
   build:
-    if: ${{ github.repository == 'TongchengOpenSource/smart-doc' && github.event.pull_request.changed_files > 0 }} # Run this job only if there are file changes
     runs-on: ubuntu-latest
 
     steps:
@@ -368,7 +367,7 @@ jobs:
           repository: ${{ github.repository }}
           issue-number: ${{ github.event.number }}
           body: |
-            Pull requests ${{ github.event.number }} report:
+            Pull requests [#${{ github.event.number }}](https://github.com/${{ github.repository }}/pull/${{ github.event.number }}) report:
             ${{ env.job_status }}  
             [DETAILS](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
             
