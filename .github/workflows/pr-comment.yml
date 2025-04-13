@@ -11,6 +11,12 @@ jobs:
       pull-requests: write
     name: Say thanks for the PR and hint to document
     steps:
+      - name: Debug PR context
+        run: |
+          echo "PR author: ${{ github.event.pull_request.user.login }}"
+          echo "PR number: ${{ github.event.number }}"
+        shell: bash
+
       - name: Comment on the pull request
         uses: peter-evans/create-or-update-comment@v4
         with:
@@ -18,7 +24,7 @@ jobs:
           repository: ${{ github.repository }}
           issue-number: ${{ github.event.number }}
           body: |
-            Thanks for your PR. :pray: 
+            Thanks for your PR @${{ github.event.pull_request.user.login }}. :pray: 
             Please check again for your PR changes whether they contain any usage configuration change, such as `Add new configuration` or `Change default value of configuration`.
             If so, please add or update documents (Markdown format) in the `docs/` directory of the repository [smart-doc-group/smart-doc-group.github.io](https://github.com/smart-doc-group/smart-doc-group.github.io/tree/master/docs).
             
@@ -29,7 +35,7 @@ jobs:
             
             ---
             
-            感谢您提交的PR。 :pray: 
+            感谢您提交的PR @${{ github.event.pull_request.user.login }}。 :pray
             请再次查看您的PR内容，确认是否包含任何使用方式或配置参数的变更，如：`新增配置参数`、`修改默认配置`等操作。
             如果是，请确保在提交之前，在仓库[smart-doc-group/smart-doc-group.github.io](https://github.com/smart-doc-group/smart-doc-group.github.io/tree/master/docs)中的`docs/`目录下添加或更新文档（Markdown格式）。
             
