@@ -7,10 +7,16 @@ on:
 jobs:
   thanks-and-hint-to-document:
     runs-on: ubuntu-latest
+    env:
+      PR_AUTHOR: ${{ github.event.pull_request.user.login }}
     permissions:
       pull-requests: write
     name: Say thanks for the PR and hint to document
     steps:
+      - name: Debug PR author
+        run: |
+          echo "PR author: $PR_AUTHOR"
+
       - name: Comment on the pull request
         uses: peter-evans/create-or-update-comment@v4
         with:
@@ -18,6 +24,8 @@ jobs:
           repository: ${{ github.repository }}
           issue-number: ${{ github.event.number }}
           body: |
+            @${{ github.event.pull_request.user.login }}
+            
             Thanks for your PR. :pray: 
             Please check again for your PR changes whether they contain any usage configuration change, such as `Add new configuration` or `Change default value of configuration`.
             If so, please add or update documents (Markdown format) in the `docs/` directory of the repository [smart-doc-group/smart-doc-group.github.io](https://github.com/smart-doc-group/smart-doc-group.github.io/tree/master/docs).
