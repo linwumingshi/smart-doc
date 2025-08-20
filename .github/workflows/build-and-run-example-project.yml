@@ -4,9 +4,6 @@ on:
   pull_request:
     branches:
       - master
-    paths:
-      - 'src/**'          # Trigger workflow only if files in src directory change
-      - 'pom.xml'         # Trigger workflow only if pom.xml file changes
 
 env:
   smart-doc-version: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
