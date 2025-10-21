@@ -7,11 +7,22 @@ on:
     paths:
       - 'src/**'          # Trigger workflow only if files in src directory change
       - 'pom.xml'         # Trigger workflow only if pom.xml file changes
+      - '.github/**'      # Trigger workflow only if files in .github directory change
 
 env:
   smart-doc-version: ${{ github.run_id }} # Use the current GitHub workflow run ID as a temporary version number
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+
+      - name: Check License Header
+        uses: korandoru/hawkeye@v6
+
+
   build:
     runs-on: ubuntu-latest
 
